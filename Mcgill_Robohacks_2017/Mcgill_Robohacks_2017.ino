@@ -9,9 +9,10 @@
 #include <SPI.h>
 #endif
 
-int motorOne;
-int motorTwo;
-int servoPin = 6;
+int motorOne1 = 5;
+int motorOne2 = 6;
+
+int servoPin = 3;
 Servo steerServo;
 
 USB Usb;
@@ -27,8 +28,8 @@ void setup() {
   }
   Serial.print(F("\r\nPS3 Bluetooth Library Started"));
 
-  pinMode(motorOne, OUTPUT);
-  pinMode(motorTwo, OUTPUT);
+  pinMode(motorOne1, OUTPUT);
+  pinMode(motorOne2, OUTPUT);
   steerServo.attach(servoPin);
 }
 
@@ -37,18 +38,31 @@ void loop() {
 
   if (PS3.PS3Connected || PS3.PS3NavigationConnected) {
     int leftJoyY = map(PS3.getAnalogHat(LeftHatY), 255, 0, -127, 127);
-    int rightJoyX = map(PS3.getAnalogHat(RightHatX), 0, 255, -127, 127);
+    int rightJoyX = map(PS3.getAnalogHat(RightHatX), 0, 255, 180, 0);
 
-    steerServo.write(map(PS3.getAnalogHat(RightHatX), 0, 255, 0, 180));
-
-    if (abs(leftJoyY) <= 10){
-      analogWrite(motorOne, 0);
-      analogWrite(motorTwo, 0);
+    if (leftJoyY >= 10) {
+      analogWrite(motorOne1, leftJoyY);
+      analogWrite(motorOne2, 0);
+      steerServo.write(rightJoyX);
+    }
+    else if (leftJoyY <= -10){
+      analogWrite(motorOne1, 0);
+      analogWrite(motorOne2, -leftJoyY);
+      steerServo.write(rightJoyX);
     }
     else {
-      analogWrite(motorOne, leftJoyY);
-      analogWrite(motorTwo, -leftJoyY);
+      analogWrite(motorOne1, 0);
+      analogWrite(motorOne2, 0);
+      steerServo.write(rightJoyX);
     }
+    delay(20);
+    
+    
+    //analogWrite(motorOne1, 1);
+    //analogWrite(motorOne2, leftJoyY);
+    //analogWrite(motorTwo1, -leftJoyY);
+    //analogWrite(motorTwo2, -leftJoyY);
+
   }
   
 }
